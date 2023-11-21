@@ -6,7 +6,7 @@ const ChatScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chat Screen</Text>
-      {/* Add your chat UI components here */}
+
     </View>
   );
 };
