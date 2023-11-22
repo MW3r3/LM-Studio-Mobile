@@ -1,94 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, SafeAreaView, Button, Alert} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  SafeAreaView,
+  Button,
+  Alert,
+  Text,
+} from "react-native";
 
-// ! UseState fix 
-// picker menu color is not dark mode
-
-// ! NOT TESTED
 
 
-const ConfigScreen = () => {
-  const [temperature, setTemperature] = useState(0);
-  const [maxTokens, setMaxTokens] = useState(0);
+const ConfigScreen = ({ navigation }) => {
   const [stream, setStream] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [temperature, setTemperature] = useState(0.3);
+  const [maxTokens, setMaxTokens] = useState(300);
 
-  useEffect(() => {
-    loadConfig();
-  }, []);
-
-  useEffect(() => {
-    setHasChanges(true);
-  }, [temperature, maxTokens, stream]);
-
-  const loadConfig = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('@chatConfig');
-      if (jsonValue != null) {
-        const config = JSON.parse(jsonValue);
-        setTemperature(config.temperature);
-        setMaxTokens(config.max_tokens);
-        setStream(config.stream);
-      }
-    } catch (e) {
-      Alert.alert('Error', 'Unable to load configuration');
+  const saveChanges = () => {
+    const temp = parseFloat(temperature);
+    const tokens = parseInt(maxTokens, 10);
+  
+    if (isNaN(temp) || isNaN(tokens)) {
+      Alert.alert('Invalid input');
+    } else {
+      navigation.navigate('Chat', {
+        temperature: temp,
+        maxTokens: tokens,
+        stream: stream,
+      });
     }
-  };
-
-  const saveChanges = async () => {
-    try {
-      const newConfig = {
-        temperature: temperature,
-        max_tokens: maxTokens,
-        stream: stream
-      };
-      await AsyncStorage.setItem('@chatConfig', JSON.stringify(newConfig));
-      setHasChanges(false);
-    } catch (e) {
-      Alert.alert('Error', 'Unable to save changes');
-    }
-  };
-
-  const discardChanges = () => {
-    loadConfig();
-    setHasChanges(false);
-  };
-
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Temperature" 
+        <Text>
+          <Text style={styles.text}>Temperature: </Text>
+          {temperature}
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Temperature"
           keyboardType="numeric"
-          onChangeText={text => setTemperature(parseFloat(text))}
+          onChangeText={(text) => setTemperature(text)}
           value={String(temperature)}
         />
-        <TextInput 
-          style={styles.input} 
-          placeholder="Max Tokens" 
+        <Text>
+          <Text style={styles.text}>Max Tokens: </Text>
+          {maxTokens}
+        </Text>
+    
+        <TextInput
+          style={styles.input}
+          placeholder="Max Tokens"
           keyboardType="numeric"
-          onChangeText={text => setMaxTokens(parseInt(text, 10))}
+          onChangeText={(text) => setMaxTokens(text)}
           value={String(maxTokens)}
         />
-        <Picker
-          selectedValue={stream}
-          color='white'
-          style={styles.picker}
-          onValueChange={(itemValue, ) => setStream(itemValue)}
-          dropdownIconColor={'white'}
-          selectionColor={"#212124"}
-            
-        >
-          <Picker.Item label="True" value={true} />
-          <Picker.Item label="False" value={false} />
-        </Picker>
-        <View style={styles.buttonContainer}>
-        <Button style={styles.saveButton} title="Save" onPress={saveChanges} disabled={!hasChanges} />
-        <Button style={styles.discardButton} title="Discard" onPress={discardChanges} disabled={!hasChanges} />
-        </View>      
+        <Text style={styles.text}>Stream: </Text>
+        
+
+        <TextInput
+          style={styles.input}
+          placeholder="Stream"
+          onChangeText={(text) => setStream(text)}
+          value={String(stream)}
+        />
+        <Button title="Save" onPress={saveChanges} />
       </View>
     </SafeAreaView>
   );
@@ -97,44 +74,35 @@ const ConfigScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor:'#161618',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#161618",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  text: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderWidth: 2,
-    width: '80%',
+    width: "80%",
     marginBottom: 10,
     padding: 10,
-    color: 'white',
+    color: "white",
   },
   picker: {
     height: 40,
-    width: '80%',
+    width: "80%",
     marginBottom: 10,
-    color: 'white',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '80%',
-  },
-  saveButton: {
-    flexDirection: 'row',
-    width: '48%',
-  },
-  discardButton: {
-    flexDirection: 'row',
-    width: '48%',
-    
+    color: "white",
   },
 });
 

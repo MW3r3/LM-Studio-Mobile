@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+// ! NOT TESTED
+
 async function fetchMessage(messages, temperature, max_tokens, stream) {
     try {
         const response = await axios.post('http://localhost:1234/v1/chat/completions', {
